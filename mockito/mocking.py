@@ -35,6 +35,15 @@ __tracebackhide__ = operator.methodcaller(
     invocation.InvocationError
 )
 
+from typing import Deque, List, Union, override
+
+from .observer import Subject, Observer
+
+RealInvocation = Union[
+    invocation.RememberedInvocation,
+    invocation.RememberedProxyInvocation
+]
+
 
 class _Dummy:
     # We spell out `__call__` here for convenience. All other magic methods
@@ -51,7 +60,7 @@ def remembered_invocation_builder(
     return invoc(*args, **kwargs)
 
 
-class Mock(object):
+class Mock(Subject):
     def __init__(
         self,
         mocked_obj: object,
@@ -69,8 +78,27 @@ class Mock(object):
         self._methods_to_unstub: dict[str, Callable | None] = {}
         self._signatures_store: dict[str, signature.Signature | None] = {}
 
+        self._observers: List[Observer] = []
+
+    @override
+    def attach(self, observer: Observer) -> None:
+        self._observers.append(observer)
+        print(f"{self.spec}: attached to {observer}")
+
+    @override
+    def detatch(self, observer: Observer) -> None:
+        self._observers.remove(observer)
+        print(f"{self.spec}: detached to {observer}")
+
+    @override
+    def notify(self) -> None:
+        for observer in self._observers:
+            print(f"{self.spec}: notifying observers")
+            observer.update(self)
+
     def remember(self, invocation: invocation.RealInvocation) -> None:
         self.invocations.append(invocation)
+        self.notify()
 
     def finish_stubbing(
         self, stubbed_invocation: invocation.StubbedInvocation
