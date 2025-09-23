@@ -32,7 +32,10 @@ __tracebackhide__ = operator.methodcaller(
     invocation.InvocationError
 )
 
-from typing import Deque, List, Union
+from typing import Deque, List, Union, override
+
+from .observer import Subject, Observer
+
 RealInvocation = Union[
     invocation.RememberedInvocation,
     invocation.RememberedProxyInvocation
@@ -52,7 +55,7 @@ def remembered_invocation_builder(mock, method_name, *args, **kwargs):
     return invoc(*args, **kwargs)
 
 
-class Mock(object):
+class Mock(Subject):
     def __init__(self, mocked_obj, strict=True, spec=None):
         self.mocked_obj = mocked_obj
         self.strict = strict
@@ -65,8 +68,27 @@ class Mock(object):
         self._methods_to_unstub = {}
         self._signatures_store = {}
 
+        self._observers: List[Observer] = []
+
+    @override
+    def attach(self, observer: Observer) -> None:
+        self._observers.append(observer)
+        print(f"{self.spec}: attached to {observer}")
+
+    @override
+    def detatch(self, observer: Observer) -> None:
+        self._observers.remove(observer)
+        print(f"{self.spec}: detached to {observer}")
+
+    @override
+    def notify(self) -> None:
+        for observer in self._observers:
+            print(f"{self.spec}: notifying observers")
+            observer.update(self)
+
     def remember(self, invocation):
         self.invocations.append(invocation)
+        self.notify()
 
     def finish_stubbing(self, stubbed_invocation):
         self.stubbed_invocations.appendleft(stubbed_invocation)
