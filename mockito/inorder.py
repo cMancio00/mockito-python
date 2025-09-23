@@ -17,11 +17,43 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+from __future__ import annotations
 
+from logging import raiseExceptions
+from typing import override, List, Any
+
+from .mocking import Mock
 from .mockito import verify as verify_main
+from .mock_registry import mock_registry
+from .observer import Observer, Subject
 
 
 def verify(object, *args, **kwargs):
     kwargs['inorder'] = True
     return verify_main(object, *args, **kwargs)
+
+class InOrder(Observer):
+
+    def __init__(self, mocks: List[Any]):
+        self._mocks = mocks
+
+        for mock in mocks:
+            mock_registry.mock_for(mock).attach(self)
+
+        self.ordered_invocations = []
+
+    @override
+    def update(self, subject: Mock) -> None:
+        print(f"InOrder: got update from: {subject}, with {subject.invocations[-1]}")
+        self.ordered_invocations.append({"mock": subject, "invocation": subject.invocations[-1]})
+        print(self.ordered_invocations[-1])
+
+    def verify(self, mock, *args, **kwargs):
+        ordered_invocation = self.ordered_invocations.pop(0)
+        actual_mock = ordered_invocation['mock']
+        wanted_mock = mock_registry.mock_for(mock)
+        # print(f"{ordered_invocation['mock']}, {mock_registry.mock_for(mock)}")
+        if actual_mock != wanted_mock:
+            raise Exception(f"Not the wanted mock! Got {actual_mock}, wanted {wanted_mock}")
+        return verify_main(obj=mock, *args, **kwargs)
 
