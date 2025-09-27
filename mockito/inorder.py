@@ -24,7 +24,7 @@ from typing import List, Any
 from .mocking import Mock
 from .mockito import verify as verify_main
 from .mock_registry import mock_registry
-from .observer import Observer, Subject
+from .observer import Observer
 
 
 def verify(object, *args, **kwargs):
@@ -42,16 +42,16 @@ class InOrder(Observer):
         self.ordered_invocations = []
 
     def update(self, subject: Mock) -> None:
-        print(f"InOrder: got update from: {subject}, with {subject.invocations[-1]}")
-        self.ordered_invocations.append({"mock": subject, "invocation": subject.invocations[-1]})
-        print(self.ordered_invocations[-1])
+        self.ordered_invocations.append(
+            {"mock": subject, "invocation": subject.invocations[-1]})
 
     def verify(self, mock, *args, **kwargs):
         ordered_invocation = self.ordered_invocations.pop(0)
         actual_mock = ordered_invocation['mock']
         wanted_mock = mock_registry.mock_for(mock)
-        # print(f"{ordered_invocation['mock']}, {mock_registry.mock_for(mock)}")
         if actual_mock != wanted_mock:
-            raise Exception(f"Not the wanted mock! Got {actual_mock}, wanted {wanted_mock}")
+            raise Exception(
+                f"Not the wanted mock! Got {actual_mock}, wanted {wanted_mock}"
+            )
         return verify_main(obj=mock, *args, **kwargs)
 
