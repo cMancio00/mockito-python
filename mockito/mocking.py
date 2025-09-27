@@ -32,7 +32,7 @@ __tracebackhide__ = operator.methodcaller(
     invocation.InvocationError
 )
 
-from typing import Deque, List, Union, override
+from typing import Deque, List, Union
 
 from .observer import Subject, Observer
 
@@ -70,17 +70,14 @@ class Mock(Subject):
 
         self._observers: List[Observer] = []
 
-    @override
     def attach(self, observer: Observer) -> None:
         self._observers.append(observer)
         print(f"{self.spec}: attached to {observer}")
 
-    @override
-    def detatch(self, observer: Observer) -> None:
+    def detach(self, observer: Observer) -> None:
         self._observers.remove(observer)
         print(f"{self.spec}: detached to {observer}")
 
-    @override
     def notify(self) -> None:
         for observer in self._observers:
             print(f"{self.spec}: notifying observers")
