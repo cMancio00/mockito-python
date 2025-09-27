@@ -14,7 +14,7 @@ class Subject(ABC):
     def attach(self, observer: Observer) -> None: pass
 
     @abstractmethod
-    def detatch(self, observer: Observer) -> None: pass
+    def detach(self, observer: Observer) -> None: pass
 
     @abstractmethod
     def notify(self) -> None: pass

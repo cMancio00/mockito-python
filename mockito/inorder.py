@@ -19,8 +19,7 @@
 # THE SOFTWARE.
 from __future__ import annotations
 
-from logging import raiseExceptions
-from typing import override, List, Any
+from typing import List, Any
 
 from .mocking import Mock
 from .mockito import verify as verify_main
@@ -42,7 +41,6 @@ class InOrder(Observer):
 
         self.ordered_invocations = []
 
-    @override
     def update(self, subject: Mock) -> None:
         print(f"InOrder: got update from: {subject}, with {subject.invocations[-1]}")
         self.ordered_invocations.append({"mock": subject, "invocation": subject.invocations[-1]})
