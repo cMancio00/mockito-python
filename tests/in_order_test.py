@@ -1,15 +1,17 @@
 from abc import ABC
 import unittest
 
-from mockito import mock, when, times
-from mockito.inorder import verify, InOrder
+from mockito import mock, when
+from mockito.inorder import InOrder
 
 
 class Cat(ABC):
-    def meow(self) -> str: pass
+    def meow(self) -> str:
+        pass
 
 class Dog(ABC):
-    def bark(self) -> str: pass
+    def bark(self) -> str:
+        pass
 
 class Friends:
     def __init__(self, cat: Cat, dog: Dog):
