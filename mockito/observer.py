@@ -4,17 +4,21 @@ from abc import ABC, abstractmethod
 
 
 class Observer(ABC):
-    @abstractmethod
-    def update(self, subject: Subject) -> None: pass
 
+    @abstractmethod
+    def update(self, subject: Subject) -> None:
+        pass
 
 class Subject(ABC):
 
     @abstractmethod
-    def attach(self, observer: Observer) -> None: pass
+    def attach(self, observer: Observer) -> None:
+        pass
 
     @abstractmethod
-    def detach(self, observer: Observer) -> None: pass
+    def detach(self, observer: Observer) -> None:
+        pass
 
     @abstractmethod
-    def notify(self) -> None: pass
+    def notify(self) -> None:
+        pass
