@@ -13,31 +13,39 @@ class Dog(ABC):
     def bark(self) -> str:
         pass
 
-class Friends:
-    def __init__(self, cat: Cat, dog: Dog):
-        self.cat = cat
-        self.dog = dog
-
-    def cat_and_dog_sound(self) -> str:
-        cat_sound: str = self.cat.meow()
-        dog_sound: str = self.dog.bark()
-        return f"{cat_sound}, {dog_sound}"
-
-
+def greet(cat: Cat, dog: Dog) -> str:
+    return f"{cat.meow()}, {dog.bark()}"
 
 class InOrderTest(unittest.TestCase):
 
     def setUp(self):
         self.cat: Cat = mock(spec=Cat, strict=True)
         self.dog: Dog = mock(spec=Dog, strict=True)
-        self.friends: Friends = Friends(self.cat, self.dog)
+
+    def test_inOrder_should_observe_single_mock(self):
+
+        in_order: InOrder = InOrder([self.cat])
+        self.assertIn(self.cat, in_order.mocks)
+
+    def test_inOrder_should_observe_several_mocks(self):
+
+        in_order: InOrder = InOrder([self.cat, self.dog])
+        self.assertIn(self.cat, in_order.mocks)
+        self.assertIn(self.dog, in_order.mocks)
+
+    def test_observing_the_same_mock_twice_should_not_be_added(self):
+
+        in_order: InOrder = InOrder([self.cat, self.cat])
+        self.assertEqual(len(in_order.mocks), 1)
+        self.assertIn(self.cat, in_order.mocks)
+
 
     def test_correct_order_declaration_should_pass(self):
         when(self.cat).meow().thenReturn("Meow!")
         when(self.dog).bark().thenReturn("Bark!")
 
         in_order: InOrder = InOrder([self.cat, self.dog])
-        self.friends.cat_and_dog_sound()
+        greet(self.cat, self.dog)
 
         in_order.verify(self.cat).meow()
         in_order.verify(self.dog).bark()
@@ -47,7 +55,7 @@ class InOrderTest(unittest.TestCase):
         when(self.dog).bark().thenReturn("Bark!")
 
         in_order: InOrder = InOrder([self.cat, self.dog])
-        self.friends.cat_and_dog_sound()
+        greet(self.cat, self.dog)
 
         with self.assertRaises(Exception):
             in_order.verify(self.dog).bark()

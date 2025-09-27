@@ -21,10 +21,11 @@ from __future__ import annotations
 
 from typing import List, Any
 
+from .invocation import RememberedInvocation, RememberedProxyInvocation
 from .mocking import Mock
 from .mockito import verify as verify_main
 from .mock_registry import mock_registry
-from .observer import Observer
+from .observer import Observer, Subject
 
 
 def verify(object, *args, **kwargs):
@@ -34,12 +35,16 @@ def verify(object, *args, **kwargs):
 class InOrder(Observer):
 
     def __init__(self, mocks: List[Any]):
-        self._mocks = mocks
+        self._mocks = set(mocks)
 
         for mock in mocks:
             mock_registry.mock_for(mock).attach(self)
 
         self.ordered_invocations = []
+
+    @property
+    def mocks(self):
+        return self._mocks
 
     def update(self, subject: Mock) -> None:
         self.ordered_invocations.append(
