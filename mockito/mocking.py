@@ -72,15 +72,12 @@ class Mock(Subject):
 
     def attach(self, observer: Observer) -> None:
         self._observers.append(observer)
-        print(f"{self.spec}: attached to {observer}")
 
     def detach(self, observer: Observer) -> None:
         self._observers.remove(observer)
-        print(f"{self.spec}: detached to {observer}")
 
     def notify(self) -> None:
         for observer in self._observers:
-            print(f"{self.spec}: notifying observers")
             observer.update(self)
 
     def remember(self, invocation):
