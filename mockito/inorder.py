@@ -32,7 +32,8 @@ def verify(object, *args, **kwargs):
     kwargs['inorder'] = True
     return verify_main(object, *args, **kwargs)
 
-class InOrder(Observer):
+
+class InOrder(Observer[Mock]):
 
     def __init__(self, mocks: List[Any]):
         counter = Counter(mocks)
