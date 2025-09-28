@@ -12,6 +12,7 @@
 -e file:.
 alabaster==0.7.13
     # via sphinx
+assertpy==1.1
 babel==2.13.1
     # via sphinx
 bump2version==1.0.1
@@ -20,8 +21,6 @@ certifi==2023.7.22
 charset-normalizer==3.3.2
     # via requests
 colorama==0.4.6
-    # via pytest
-    # via sphinx
     # via sphinx-autobuild
 docutils==0.20.1
     # via sphinx
