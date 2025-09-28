@@ -20,8 +20,9 @@
 from __future__ import annotations
 
 from collections import Counter
-from typing import List, Any
+from typing import List, Any, Tuple
 
+from .invocation import RememberedInvocation, RememberedProxyInvocation
 from .mocking import Mock
 from .mockito import verify as verify_main
 from .mock_registry import mock_registry
@@ -39,13 +40,17 @@ class InOrder(Observer[Mock]):
         counter = Counter(mocks)
         duplicates = [fruit for fruit, freq in counter.items() if freq > 1]
         if duplicates:
-            raise ValueError(f"The following Mocks are duplicated: {duplicates}")
+            raise ValueError(
+                f"The following Mocks are duplicated: {duplicates}"
+            )
         self._mocks = mocks
 
         for mock in self._mocks:
             mock_registry.mock_for(mock).attach(self)
 
-        self.ordered_invocations = []
+        self.ordered_invocations: List[
+            Tuple[Mock, RememberedInvocation | RememberedProxyInvocation]
+        ] = []
 
     @property
     def mocks(self):
@@ -53,7 +58,8 @@ class InOrder(Observer[Mock]):
 
     def update(self, subject: Mock) -> None:
         self.ordered_invocations.append(
-            {"mock": subject, "invocation": subject.invocations[-1]})
+            (subject, subject.invocations[-1])
+        )
 
     def verify(self, mock, *args, **kwargs):
         ordered_invocation = self.ordered_invocations.pop(0)
