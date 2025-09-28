@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import TypeVar, Generic
 
+T = TypeVar('T', bound='Subject')
 
-class Observer(ABC):
+class Observer(Generic[T], ABC):
 
     @abstractmethod
-    def update(self, subject: Subject) -> None:
+    def update(self, subject: T) -> None:
         pass
 
 class Subject(ABC):
