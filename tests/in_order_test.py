@@ -16,7 +16,6 @@ class Dog(ABC):
         pass
 
 
-
 class InOrderTest(unittest.TestCase):
 
     def setUp(self):
@@ -40,10 +39,24 @@ class InOrderTest(unittest.TestCase):
             InOrder([self.cat, self.cat])
         assert_that(str(e.exception)).is_equal_to(f"The following Mocks are duplicated: {[self.cat]}")
 
-    def test_correct_order_declaration_should_pass(self):
+    def test_calling_a_function_should_just_record_the_mocks_call(self):
         when(self.cat).meow().thenReturn("Meow!")
         when(self.dog).bark().thenReturn("Bark!")
 
+        to_ignore = mock()
+        when(to_ignore).meow().thenReturn("I must be ignored!")
+
+        in_order: InOrder = InOrder([self.cat, self.dog])
+        self.greet(self.cat, self.dog)
+        to_ignore.meow()
+
+        assert_that(in_order.ordered_invocations).is_length(2)
+        assert_that(in_order.ordered_invocations).does_not_contain(to_ignore)
+
+
+    def test_correct_order_declaration_should_pass(self):
+        when(self.cat).meow().thenReturn("Meow!")
+        when(self.dog).bark().thenReturn("Bark!")
 
         in_order: InOrder = InOrder([self.cat, self.dog])
         self.greet(self.cat, self.dog)
