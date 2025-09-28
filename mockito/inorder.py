@@ -41,7 +41,6 @@ class InOrder(Observer):
             raise ValueError(f"The following Mocks are duplicated: {duplicates}")
         self._mocks = mocks
 
-
         for mock in self._mocks:
             mock_registry.mock_for(mock).attach(self)
 
