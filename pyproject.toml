@@ -25,6 +25,7 @@ dev-dependencies = [
     "assertpy>=1.1",
     "mypy>=1.18.2",
     "flake8>=7.3.0",
+    "types-assertpy>=1.1.0.20250502",
 ]
 
 [tool.hatch.metadata]
