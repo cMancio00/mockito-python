@@ -23,7 +23,7 @@ from collections import Counter, deque
 from typing import List, Any, Tuple, Deque
 
 from .verification import VerificationError
-from .invocation import RememberedInvocation, RememberedProxyInvocation
+from .invocation import RealInvocation
 from .mocking import Mock
 from .mockito import verify as verify_main
 from .mock_registry import mock_registry
@@ -50,10 +50,12 @@ class InOrder(Observer[Mock]):
         self._mocks = mocks
 
         for mock in self._mocks:
-            mock_registry.mock_for(mock).attach(self)
+            m = mock_registry.mock_for(mock)
+            if m:
+                m.attach(self)
 
         self.ordered_invocations: Deque[
-            Tuple[Mock, RememberedInvocation | RememberedProxyInvocation]
+            Tuple[Mock, RealInvocation]
         ] = deque()
 
     @property
@@ -78,6 +80,11 @@ class InOrder(Observer[Mock]):
         :param mock: mock to verify the ordered invocation
 
         """
+        if not self.ordered_invocations:
+            raise VerificationError(
+                f"Trying to verify ordered invocation of {mock}, "
+                f"but no other invocations have been recorded."
+            )
         ordered_invocation = self.ordered_invocations.popleft()
         called_mock = ordered_invocation[0]
 
@@ -87,4 +94,4 @@ class InOrder(Observer[Mock]):
                 f"Not the wanted mock! Called {called_mock},"
                 f" but expected {expected_mock}!"
             )
-        return verify_main(obj=mock, times=1, inorder=True)
+        return verify_main(obj=mock, atleast=1, inorder=True)

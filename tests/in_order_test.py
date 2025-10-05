@@ -1,7 +1,7 @@
 import pytest
 
 from mockito import (mock, when, VerificationError,
-                     verifyZeroInteractions, verifyNoMoreInteractions)
+                     verifyZeroInteractions, ensureNoUnverifiedInteractions)
 from mockito.inorder import InOrder
 from mockito.mock_registry import mock_registry
 
@@ -66,6 +66,24 @@ def test_incorrect_order_declaration_should_fail():
                             f"Called {mock_registry.mock_for(a)}, "
                             f"but expected {mock_registry.mock_for(b)}!")
 
+def test_verifing_not_observed_mocks_should_raise():
+    a = mock()
+    b = mock()
+
+    when(a).method().thenReturn("Calling a")
+    when(b).other_method().thenReturn("Calling b")
+
+    in_order: InOrder = InOrder([a])
+    a.method()
+    b.other_method()
+
+    with pytest.raises(VerificationError) as e:
+        in_order.verify(a).method()
+        in_order.verify(b).other_method()
+    assert str(e.value) == (f"Trying to verify ordered invocation "
+                            f"of {b}, "
+                            f"but no other invocations have been recorded.")
+
 def test_can_use_other_verifications():
     a = mock()
     b = mock()
@@ -82,21 +100,21 @@ def test_can_use_other_verifications():
     in_order.verify(a).method()
     in_order.verify(b).other_method()
 
-    verifyNoMoreInteractions(a)
+    ensureNoUnverifiedInteractions(a)
     verifyZeroInteractions(to_ignore)
 
-# def test_can_verify_multiple_orders():
-#     a = mock()
-#     b = mock()
-#
-#     when(a).method().thenReturn("Calling a")
-#     when(b).other_method().thenReturn("Calling b")
-#
-#     in_order: InOrder = InOrder([a,b])
-#     a.method()
-#     b.other_method()
-#     a.method()
-#
-#     in_order.verify(a).method()
-#     in_order.verify(b).other_method()
-#     in_order.verify(a).method()
+def test_can_verify_multiple_orders():
+    a = mock()
+    b = mock()
+
+    when(a).method().thenReturn("Calling a")
+    when(b).other_method().thenReturn("Calling b")
+
+    in_order: InOrder = InOrder([a, b])
+    a.method()
+    b.other_method()
+    a.method()
+
+    in_order.verify(a).method()
+    in_order.verify(b).other_method()
+    in_order.verify(a).method()
