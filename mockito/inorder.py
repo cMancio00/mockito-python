@@ -69,6 +69,7 @@ class InOrder(Observer[Mock]):
         expected_mock = mock_registry.mock_for(mock)
         if called_mock != expected_mock:
             raise VerificationError(
-                f"Not the wanted mock! Called {called_mock}, but expected {expected_mock}!"
+                f"Not the wanted mock! Called {called_mock},"
+                f" but expected {expected_mock}!"
             )
         return verify_main(obj=mock, times=1, inorder=True)
