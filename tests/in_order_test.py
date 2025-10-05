@@ -1,6 +1,7 @@
 import pytest
 
-from mockito import mock, when, VerificationError, verify, verifyZeroInteractions, verifyNoMoreInteractions
+from mockito import (mock, when, VerificationError,
+                     verifyZeroInteractions, verifyNoMoreInteractions)
 from mockito.inorder import InOrder
 from mockito.mock_registry import mock_registry
 
@@ -34,7 +35,7 @@ def test_correct_order_declaration_should_pass():
     to_ignore = mock()
     when(to_ignore).ignore().thenReturn("I must be ignored!")
 
-    in_order: InOrder = InOrder([a,b])
+    in_order: InOrder = InOrder([a, b])
     a.method()
     b.other_method()
     to_ignore.ignore()
@@ -53,7 +54,7 @@ def test_incorrect_order_declaration_should_fail():
     to_ignore = mock()
     when(to_ignore).ignore().thenReturn("I must be ignored!")
 
-    in_order: InOrder = InOrder([a,b])
+    in_order: InOrder = InOrder([a, b])
     a.method()
     b.other_method()
     to_ignore.ignore()
@@ -61,7 +62,9 @@ def test_incorrect_order_declaration_should_fail():
     with pytest.raises(VerificationError) as e:
         in_order.verify(b).other_method()
         in_order.verify(a).method()
-    assert str(e.value) == f"Not the wanted mock! Called {mock_registry.mock_for(a)}, but expected {mock_registry.mock_for(b)}!"
+    assert str(e.value) == (f"Not the wanted mock! "
+                            f"Called {mock_registry.mock_for(a)}, "
+                            f"but expected {mock_registry.mock_for(b)}!")
 
 def test_can_use_other_verifications():
     a = mock()
@@ -72,7 +75,7 @@ def test_can_use_other_verifications():
     when(b).other_method().thenReturn("Calling b")
     when(to_ignore).ignore().thenReturn("I must be ignored!")
 
-    in_order: InOrder = InOrder([a,b])
+    in_order: InOrder = InOrder([a, b])
     a.method()
     b.other_method()
 
