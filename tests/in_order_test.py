@@ -118,3 +118,34 @@ def test_can_verify_multiple_orders():
     in_order.verify(a).method()
     in_order.verify(b).other_method()
     in_order.verify(a).method()
+
+def test_in_order_context_manager():
+    a = mock()
+    b = mock()
+
+    when(a).method().thenReturn("Calling a")
+    when(b).other_method().thenReturn("Calling b")
+
+    with InOrder([a, b]) as in_order:
+        a.method()
+        b.other_method()
+
+        in_order.verify(a)
+        in_order.verify(b)
+
+
+def test_in_order_context_manager_raises_if_mocks_are_not_verified():
+    a = mock()
+    b = mock()
+
+    when(a).method().thenReturn("Calling a")
+    when(b).other_method().thenReturn("Calling b")
+
+    with pytest.raises(VerificationError) as e:
+        with InOrder([a, b]) as in_order:
+            a.method()
+            b.other_method()
+
+            in_order.verify(a)
+    assert str(e.value) == (f"Some mocks have not been verified: "
+                            f"{in_order.ordered_invocations}")

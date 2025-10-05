@@ -95,3 +95,11 @@ class InOrder(Observer[Mock]):
                 f" but expected {expected_mock}!"
             )
         return verify_main(obj=mock, atleast=1, inorder=True)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.ordered_invocations:
+            raise VerificationError(f"Some mocks have not been verified: "
+                                    f"{self.ordered_invocations}")
