@@ -35,7 +35,7 @@ __tracebackhide__ = operator.methodcaller(
     invocation.InvocationError
 )
 
-from typing import Deque, List, Union
+from typing import List, Union
 
 from .observer import Subject, Observer
 
