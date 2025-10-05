@@ -259,11 +259,6 @@ class Mock(Subject):
                 )
             )
 
-    def __repr__(self):
-        if self.spec:
-            return f"Mock of class: {self.spec.__name__}"
-        return "Dummy Mock"
-
 
 class _OMITTED(object):
     def __repr__(self):
