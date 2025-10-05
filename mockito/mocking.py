@@ -26,7 +26,7 @@ from collections import deque
 from . import invocation, signature, utils
 from .mock_registry import mock_registry
 
-from typing import Callable
+from typing import Callable, TypeVar
 
 __all__ = ['mock']
 
@@ -44,6 +44,7 @@ RealInvocation = Union[
     invocation.RememberedProxyInvocation
 ]
 
+T = TypeVar('T', bound='Subject')
 
 class _Dummy:
     # We spell out `__call__` here for convenience. All other magic methods
@@ -80,10 +81,10 @@ class Mock(Subject):
 
         self._observers: List[Observer] = []
 
-    def attach(self, observer: Observer) -> None:
+    def attach(self, observer: Observer[T]) -> None:
         self._observers.append(observer)
 
-    def detach(self, observer: Observer) -> None:
+    def detach(self, observer: Observer[T]) -> None:
         self._observers.remove(observer)
 
     def notify(self) -> None:
