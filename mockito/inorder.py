@@ -38,6 +38,9 @@ def verify(object, *args, **kwargs):
 class InOrder(Observer[Mock]):
 
     def __init__(self, mocks: List[Any]):
+        """
+        :type mocks: List[Any] = List of mocks.
+        """
         counter = Counter(mocks)
         duplicates = [d for d, freq in counter.items() if freq > 1]
         if duplicates:
@@ -58,11 +61,23 @@ class InOrder(Observer[Mock]):
         return self._mocks
 
     def update(self, subject: Mock) -> None:
+        """
+        Observer method that recevied an
+        invocation notification from the subject.
+
+        :param subject: subject to be added to the list of orderd invocation
+        """
         self.ordered_invocations.append(
             (subject, subject.invocations[-1])
         )
 
-    def verify(self, mock, *args, **kwargs):
+    def verify(self, mock):
+        """
+        Central method of InOrder class.
+        Use this method to verify the calling order of observed mocks.
+        :param mock: mock to verify the ordered invocation
+
+        """
         ordered_invocation = self.ordered_invocations.popleft()
         called_mock = ordered_invocation[0]
 
