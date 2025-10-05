@@ -12,7 +12,6 @@
 -e file:.
 alabaster==0.7.13
     # via sphinx
-assertpy==1.1
 babel==2.13.1
     # via sphinx
 bump2version==1.0.1
@@ -87,7 +86,6 @@ sphinxcontrib-serializinghtml==1.1.9
     # via sphinx
 tornado==6.3.3
     # via livereload
-types-assertpy==1.1.0.20250502
 typing-extensions==4.15.0
     # via mypy
 urllib3==2.1.0

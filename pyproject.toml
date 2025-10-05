@@ -22,10 +22,8 @@ dev-dependencies = [
     "bump2version>=0.5.11",
     "Sphinx>=5.3.0",
     "sphinx-autobuild>=2021.3.14",
-    "assertpy>=1.1",
     "mypy>=1.18.2",
     "flake8>=7.3.0",
-    "types-assertpy>=1.1.0.20250502",
 ]
 
 [tool.hatch.metadata]
