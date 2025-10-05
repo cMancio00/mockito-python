@@ -14,11 +14,11 @@ class Observer(Generic[T], ABC):
 class Subject(ABC):
 
     @abstractmethod
-    def attach(self, observer: Observer) -> None:
+    def attach(self, observer: Observer[T]) -> None:
         pass
 
     @abstractmethod
-    def detach(self, observer: Observer) -> None:
+    def detach(self, observer: Observer[T]) -> None:
         pass
 
     @abstractmethod
