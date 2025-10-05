@@ -19,9 +19,10 @@
 # THE SOFTWARE.
 from __future__ import annotations
 
-from collections import Counter
-from typing import List, Any, Tuple
+from collections import Counter, deque
+from typing import List, Any, Tuple, Deque
 
+from .verification import VerificationError
 from .invocation import RememberedInvocation, RememberedProxyInvocation
 from .mocking import Mock
 from .mockito import verify as verify_main
@@ -38,7 +39,7 @@ class InOrder(Observer[Mock]):
 
     def __init__(self, mocks: List[Any]):
         counter = Counter(mocks)
-        duplicates = [fruit for fruit, freq in counter.items() if freq > 1]
+        duplicates = [d for d, freq in counter.items() if freq > 1]
         if duplicates:
             raise ValueError(
                 f"The following Mocks are duplicated: {duplicates}"
@@ -48,9 +49,9 @@ class InOrder(Observer[Mock]):
         for mock in self._mocks:
             mock_registry.mock_for(mock).attach(self)
 
-        self.ordered_invocations: List[
+        self.ordered_invocations: Deque[
             Tuple[Mock, RememberedInvocation | RememberedProxyInvocation]
-        ] = []
+        ] = deque()
 
     @property
     def mocks(self):
@@ -62,12 +63,12 @@ class InOrder(Observer[Mock]):
         )
 
     def verify(self, mock, *args, **kwargs):
-        ordered_invocation = self.ordered_invocations.pop(0)
-        actual_mock = ordered_invocation['mock']
-        wanted_mock = mock_registry.mock_for(mock)
-        if actual_mock != wanted_mock:
-            raise Exception(
-                f"Not the wanted mock! Got {actual_mock}, wanted {wanted_mock}"
-            )
-        return verify_main(obj=mock, *args, **kwargs)
+        ordered_invocation = self.ordered_invocations.popleft()
+        called_mock = ordered_invocation[0]
 
+        expected_mock = mock_registry.mock_for(mock)
+        if called_mock != expected_mock:
+            raise VerificationError(
+                f"Not the wanted mock! Called {called_mock}, but expected {expected_mock}!"
+            )
+        return verify_main(obj=mock, times=1, inorder=True)

@@ -1,86 +1,99 @@
-from abc import ABC, abstractmethod
-import unittest
+import pytest
 
-from assertpy import assert_that
-
-from mockito import mock, when
+from mockito import mock, when, VerificationError, verify, verifyZeroInteractions, verifyNoMoreInteractions
 from mockito.inorder import InOrder
 from mockito.mock_registry import mock_registry
 
 
-class Cat(ABC):
-    @abstractmethod
-    def meow(self) -> str:
-        pass
+def test_in_order_should_observe_single_mock():
+    m = mock()
+    in_order: InOrder = InOrder([m])
+    assert m in in_order.mocks
 
-class Dog(ABC):
-    @abstractmethod
-    def bark(self) -> str:
-        pass
+def test_in_order_should_observe_several_mocks():
+    a = mock()
+    b = mock()
+    c = mock()
+    in_order: InOrder = InOrder([b, c])
+    assert b and c in in_order.mocks
+    assert a not in in_order.mocks
 
+def test_observing_the_same_mock_twice_should_raise():
+    a = mock()
+    with pytest.raises(ValueError) as e:
+        InOrder([a, a])
+    assert str(e.value) == f"The following Mocks are duplicated: {[a]}"
 
-class InOrderTest(unittest.TestCase):
+def test_correct_order_declaration_should_pass():
+    a = mock()
+    b = mock()
 
-    def setUp(self):
-        self.cat: Cat = mock(spec=Cat, strict=True)
-        self.dog: Dog = mock(spec=Dog, strict=True)
+    when(a).method().thenReturn("Calling a")
+    when(b).other_method().thenReturn("Calling b")
 
-        self.greet = lambda cat, dog: f"{cat.meow()}, {dog.bark()}"
+    to_ignore = mock()
+    when(to_ignore).ignore().thenReturn("I must be ignored!")
 
-    def test_inOrder_should_observe_single_mock(self):
+    in_order: InOrder = InOrder([a,b])
+    a.method()
+    b.other_method()
+    to_ignore.ignore()
 
-        in_order: InOrder = InOrder([self.cat])
-        self.assertIn(self.cat, in_order.mocks)
-
-    def test_inOrder_should_observe_several_mocks(self):
-
-        in_order: InOrder = InOrder([self.cat, self.dog])
-        assert_that(in_order.mocks).contains_only(self.cat, self.dog)
-
-    def test_observing_the_same_mock_twice_should_raise(self):
-        with self.assertRaises(ValueError) as e:
-            InOrder([self.cat, self.cat])
-        assert_that(str(e.exception)).is_equal_to(
-            f"The following Mocks are duplicated: {[self.cat]}"
-        )
-
-    def test_calling_a_function_should_just_record_the_mocks_call(self):
-        when(self.cat).meow().thenReturn("Meow!")
-        when(self.dog).bark().thenReturn("Bark!")
-
-        to_ignore = mock()
-        when(to_ignore).meow().thenReturn("I must be ignored!")
-
-        in_order: InOrder = InOrder([self.cat, self.dog])
-        self.greet(self.cat, self.dog)
-        to_ignore.meow()
-
-        assert_that([m[0] for m in in_order.ordered_invocations]).contains(
-            mock_registry.mock_for(self.cat), mock_registry.mock_for(self.dog)
-        ).does_not_contain(mock_registry.mock_for(to_ignore))
+    in_order.verify(a).method()
+    in_order.verify(b).other_method()
 
 
-    # def test_correct_order_declaration_should_pass(self):
-    #     when(self.cat).meow().thenReturn("Meow!")
-    #     when(self.dog).bark().thenReturn("Bark!")
-    #
-    #     in_order: InOrder = InOrder([self.cat, self.dog])
-    #     self.greet(self.cat, self.dog)
-    #
-    #     in_order.verify(self.cat).meow()
-    #     in_order.verify(self.dog).bark()
-    #
-    # def test_incorrect_order_declaration_should_fail(self):
-    #     when(self.cat).meow().thenReturn("Meow!")
-    #     when(self.dog).bark().thenReturn("Bark!")
-    #
-    #     in_order: InOrder = InOrder([self.cat, self.dog])
-    #     self.greet(self.cat, self.dog)
-    #
-    #     with self.assertRaises(Exception):
-    #         in_order.verify(self.dog).bark()
-    #         in_order.verify(self.cat).meow()
+def test_incorrect_order_declaration_should_fail():
+    a = mock()
+    b = mock()
 
+    when(a).method().thenReturn("Calling a")
+    when(b).other_method().thenReturn("Calling b")
 
-if __name__ == '__main__':
-    unittest.main()
+    to_ignore = mock()
+    when(to_ignore).ignore().thenReturn("I must be ignored!")
+
+    in_order: InOrder = InOrder([a,b])
+    a.method()
+    b.other_method()
+    to_ignore.ignore()
+
+    with pytest.raises(VerificationError) as e:
+        in_order.verify(b).other_method()
+        in_order.verify(a).method()
+    assert str(e.value) == f"Not the wanted mock! Called {mock_registry.mock_for(a)}, but expected {mock_registry.mock_for(b)}!"
+
+def test_can_use_other_verifications():
+    a = mock()
+    b = mock()
+    to_ignore = mock()
+
+    when(a).method().thenReturn("Calling a")
+    when(b).other_method().thenReturn("Calling b")
+    when(to_ignore).ignore().thenReturn("I must be ignored!")
+
+    in_order: InOrder = InOrder([a,b])
+    a.method()
+    b.other_method()
+
+    in_order.verify(a).method()
+    in_order.verify(b).other_method()
+
+    verifyNoMoreInteractions(a)
+    verifyZeroInteractions(to_ignore)
+
+# def test_can_verify_multiple_orders():
+#     a = mock()
+#     b = mock()
+#
+#     when(a).method().thenReturn("Calling a")
+#     when(b).other_method().thenReturn("Calling b")
+#
+#     in_order: InOrder = InOrder([a,b])
+#     a.method()
+#     b.other_method()
+#     a.method()
+#
+#     in_order.verify(a).method()
+#     in_order.verify(b).other_method()
+#     in_order.verify(a).method()
