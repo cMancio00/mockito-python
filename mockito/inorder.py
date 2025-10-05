@@ -62,10 +62,10 @@ class InOrder(Observer[Mock]):
 
     def update(self, subject: Mock) -> None:
         """
-        Observer method that recevied an
+        Observer method that received an
         invocation notification from the subject.
 
-        :param subject: subject to be added to the list of orderd invocation
+        :param subject: subject to be added to the list of ordered invocation
         """
         self.ordered_invocations.append(
             (subject, subject.invocations[-1])
