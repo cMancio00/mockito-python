@@ -20,7 +20,7 @@
 from __future__ import annotations
 
 from collections import Counter, deque
-from typing import List, Any, Tuple, Deque
+from typing import Tuple, Deque
 
 from .verification import VerificationError
 from .invocation import RealInvocation
@@ -45,7 +45,8 @@ class InOrder(Observer[Mock]):
         duplicates = [d for d, freq in counter.items() if freq > 1]
         if duplicates:
             raise ValueError(
-                f"The following Mocks are duplicated: {duplicates}"
+                f"The following Mocks are duplicated: "
+                f"{[str(d) for d in duplicates]}"
             )
         self._mocks = mocks
 
@@ -80,6 +81,13 @@ class InOrder(Observer[Mock]):
         :param mock: mock to verify the ordered invocation
 
         """
+
+        if not (mock in self.mocks):
+            raise VerificationError(
+                f"InOrder Verification Error! "
+                f"Unexpected call from not observed {mock}."
+            )
+
         if not self.ordered_invocations:
             raise VerificationError(
                 f"Trying to verify ordered invocation of {mock}, "
@@ -87,12 +95,14 @@ class InOrder(Observer[Mock]):
             )
         ordered_invocation = self.ordered_invocations.popleft()
         called_mock = ordered_invocation[0]
+        invocation = ordered_invocation[1]
 
         expected_mock = mock_registry.mock_for(mock)
         if called_mock != expected_mock:
             raise VerificationError(
-                f"Not the wanted mock! Called {called_mock},"
-                f" but expected {expected_mock}!"
+                f"InOrder verification error! "
+                f"Wanted a call from {str(expected_mock)}, but "
+                f"got {invocation} from {str(called_mock)} instead!"
             )
         return verify_main(obj=mock, atleast=1, inorder=True)
 

@@ -260,6 +260,12 @@ class Mock(Subject):
                 )
             )
 
+    def __str__(self):
+        name: str = 'Dummy'
+        if self.spec:
+            name = self.spec.__name__
+        return f"Mock<{name}>"
+
 
 class _OMITTED(object):
     def __repr__(self):
@@ -367,6 +373,12 @@ def mock(config_or_spec=None, spec=None, strict=OMITTED):  # noqa: C901
             if spec:
                 name += spec.__name__
             return "<%s id=%s>" % (name, id(self))
+
+        def __str__(self):
+            name = 'Dummy'
+            if spec:
+                name = spec.__name__
+            return f"Mock<{name}>"
 
 
     # That's a tricky one: The object we will return is an *instance* of our
