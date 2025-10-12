@@ -1,7 +1,8 @@
 import pytest
 
-from mockito import mock, when, VerificationError
+from mockito import mock, VerificationError
 from mockito.inorder import InOrder
+from mockito import verify
 
 def test_observing_the_same_mock_twice_should_raise():
     a = mock()
@@ -68,18 +69,15 @@ def test_can_verify_multiple_orders():
     in_order.verify(cat).meow()
 
 def test_in_order_context_manager():
-    a = mock()
-    b = mock()
+    cat = mock()
+    dog = mock()
 
-    when(a).method().thenReturn("Calling a")
-    when(b).other_method().thenReturn("Calling b")
+    with InOrder(cat, dog) as in_order:
+        cat.meow()
+        dog.bark()
 
-    with InOrder(a, b) as in_order:
-        a.method()
-        b.other_method()
-
-        in_order.verify(a)
-        in_order.verify(b)
+        in_order.verify(cat).meow()
+        in_order.verify(dog).bark()
 
 
 def test_exiting_context_manager_should_detatch_mocks():
@@ -92,3 +90,7 @@ def test_exiting_context_manager_should_detatch_mocks():
 
         in_order.verify(cat).meow()
         in_order.verify(dog).bark()
+
+    #can still verify after leaving the context manager
+    verify(cat).meow()
+    verify(dog).bark()
