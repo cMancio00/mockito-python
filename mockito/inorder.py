@@ -111,4 +111,4 @@ class InOrder(Observer[Mock]):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         for mock in self.mocks:
-            mock.detach()
+            mock.detach(self)
