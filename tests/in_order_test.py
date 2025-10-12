@@ -91,6 +91,6 @@ def test_exiting_context_manager_should_detatch_mocks():
         in_order.verify(cat).meow()
         in_order.verify(dog).bark()
 
-    #can still verify after leaving the context manager
+    # can still verify after leaving the context manager
     verify(cat).meow()
     verify(dog).bark()
