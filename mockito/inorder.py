@@ -37,7 +37,7 @@ def verify(object, *args, **kwargs):
 
 class InOrder(Observer[Mock]):
 
-    def __init__(self, mocks: List[Any]):
+    def __init__(self, *mocks: Mock):
         """
         :type mocks: List[Any] = List of mocks.
         """
@@ -100,6 +100,5 @@ class InOrder(Observer[Mock]):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.ordered_invocations:
-            raise VerificationError(f"Some mocks have not been verified: "
-                                    f"{self.ordered_invocations}")
+        for mock in self.mocks:
+            mock.detach()
