@@ -33,7 +33,6 @@ def test_incorrect_order_declaration_should_fail():
 
     with pytest.raises(VerificationError) as e:
         in_order.verify(cat).meow()
-        in_order.verify(dog).bark()
     assert str(e.value) == (f"Not the wanted mock! "
                             f"Called {mock_registry.mock_for(dog)}, "
                             f"but expected {mock_registry.mock_for(cat)}!")
