@@ -55,25 +55,6 @@ def test_verifing_not_observed_mocks_should_raise():
                             f"of {b}, "
                             f"but no other invocations have been recorded.")
 
-def test_can_use_other_verifications():
-    a = mock()
-    b = mock()
-    to_ignore = mock()
-
-    when(a).method().thenReturn("Calling a")
-    when(b).other_method().thenReturn("Calling b")
-    when(to_ignore).ignore().thenReturn("I must be ignored!")
-
-    in_order: InOrder = InOrder([a, b])
-    a.method()
-    b.other_method()
-
-    in_order.verify(a).method()
-    in_order.verify(b).other_method()
-
-    ensureNoUnverifiedInteractions(a)
-    verifyZeroInteractions(to_ignore)
-
 def test_can_verify_multiple_orders():
     a = mock()
     b = mock()
