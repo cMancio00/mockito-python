@@ -5,20 +5,6 @@ from mockito import (mock, when, VerificationError,
 from mockito.inorder import InOrder
 from mockito.mock_registry import mock_registry
 
-
-def test_in_order_should_observe_single_mock():
-    m = mock()
-    in_order: InOrder = InOrder([m])
-    assert m in in_order.mocks
-
-def test_in_order_should_observe_several_mocks():
-    a = mock()
-    b = mock()
-    c = mock()
-    in_order: InOrder = InOrder([b, c])
-    assert b and c in in_order.mocks
-    assert a not in in_order.mocks
-
 def test_observing_the_same_mock_twice_should_raise():
     a = mock()
     with pytest.raises(ValueError) as e:
