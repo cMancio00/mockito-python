@@ -12,45 +12,31 @@ def test_observing_the_same_mock_twice_should_raise():
     assert str(e.value) == f"The following Mocks are duplicated: {[a]}"
 
 def test_correct_order_declaration_should_pass():
-    a = mock()
-    b = mock()
+    cat = mock()
+    dog = mock()
 
-    when(a).method().thenReturn("Calling a")
-    when(b).other_method().thenReturn("Calling b")
+    in_order: InOrder = InOrder([cat, dog])
+    cat.meow()
+    dog.bark()
 
-    to_ignore = mock()
-    when(to_ignore).ignore().thenReturn("I must be ignored!")
-
-    in_order: InOrder = InOrder([a, b])
-    a.method()
-    b.other_method()
-    to_ignore.ignore()
-
-    in_order.verify(a).method()
-    in_order.verify(b).other_method()
+    in_order.verify(cat).meow()
+    in_order.verify(dog).bark()
 
 
 def test_incorrect_order_declaration_should_fail():
-    a = mock()
-    b = mock()
+    dog = mock()
+    cat = mock()
 
-    when(a).method().thenReturn("Calling a")
-    when(b).other_method().thenReturn("Calling b")
-
-    to_ignore = mock()
-    when(to_ignore).ignore().thenReturn("I must be ignored!")
-
-    in_order: InOrder = InOrder([a, b])
-    a.method()
-    b.other_method()
-    to_ignore.ignore()
+    in_order: InOrder = InOrder([cat, dog])
+    dog.bark()
+    cat.meow()
 
     with pytest.raises(VerificationError) as e:
-        in_order.verify(b).other_method()
-        in_order.verify(a).method()
+        in_order.verify(cat).meow()
+        in_order.verify(dog).bark()
     assert str(e.value) == (f"Not the wanted mock! "
-                            f"Called {mock_registry.mock_for(a)}, "
-                            f"but expected {mock_registry.mock_for(b)}!")
+                            f"Called {mock_registry.mock_for(dog)}, "
+                            f"but expected {mock_registry.mock_for(cat)}!")
 
 def test_verifing_not_observed_mocks_should_raise():
     a = mock()
