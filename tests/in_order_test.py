@@ -68,6 +68,19 @@ def test_can_verify_multiple_orders():
     in_order.verify(dog).bark()
     in_order.verify(cat).meow()
 
+def test_can_verify_multiple_arguments():
+    cat = mock()
+    dog = mock()
+
+    in_order: InOrder = InOrder(cat, dog)
+    cat.meow("Meow!")
+    dog.bark()
+    cat.meow("Rrrr")
+
+    in_order.verify(cat).meow("Meow!")
+    in_order.verify(dog).bark()
+    in_order.verify(cat).meow("Rrrr")
+
 def test_in_order_context_manager():
     cat = mock()
     dog = mock()
