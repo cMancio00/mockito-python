@@ -39,10 +39,6 @@ from typing import List, Union
 
 from .observer import Subject, Observer
 
-RealInvocation = Union[
-    invocation.RememberedInvocation,
-    invocation.RememberedProxyInvocation
-]
 
 T = TypeVar('T', bound='Subject')
 
